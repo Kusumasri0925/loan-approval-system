@@ -1,35 +1,94 @@
-# Loan Approval System - Backend
+# Explainable AI Loan Approval System
 
-This is the backend API built using Spring Boot.
-
-It handles authentication, loan processing, and database operations.
+A full-stack web application that simulates an intelligent loan approval platform.
+It evaluates loan applications based on income and credit score while clearly explaining the approval or rejection reason.
 
 ---
 
 ## Features
 
-* User Registration
-* Email Verification
-* Login with JWT Authentication
-* Forgot Password API
-* Loan Application Processing
-* AI Loan Decision Logic
-* Loan History API
+* User Registration with Email Verification
+* Secure Login with JWT Authentication
+* Forgot Password and Email Reset
+* User Dashboard with Profile Details
+* Apply for Loans (Personal, Home, Car)
+* AI-based Loan Decision Engine
+* Loan Approval / Rejection Reason
+* Loan History Tracking
 
 ---
 
 ## Tech Stack
 
-* Java
+### Frontend
+
+* React.js
+* Tailwind CSS
+* Axios
+
+### Backend
+
 * Spring Boot
 * Spring Security
 * JWT Authentication
+
+### Database
+
 * MySQL
-* Maven
 
 ---
 
-## Run the Backend
+## System Architecture
+
+```
+React Frontend
+      ↓
+REST APIs (Spring Boot)
+      ↓
+Business Logic (Loan Decision Engine)
+      ↓
+MySQL Database
+```
+
+---
+
+## Loan Decision Logic
+
+Loan approval is based on explainable rules:
+
+* Credit Score ≥ 700 → Higher approval chance
+* Income ≥ 50% of Loan Amount → Income sufficient
+* Otherwise → Loan rejected with reason
+
+Example:
+
+Approved
+"Excellent credit score and sufficient income."
+
+Rejected
+"Low credit score or insufficient income."
+
+---
+
+## Project Structure
+
+```
+loan-approval-system
+│
+├── frontend      → React application
+│
+├── src           → Spring Boot backend
+│
+├── pom.xml       → Maven configuration
+│
+└── README.md
+```
+
+---
+
+## How to Run the Project
+
+### Backend
 
 ```
 mvn spring-boot:run
@@ -43,20 +102,26 @@ http://localhost:8080
 
 ---
 
-## API Endpoints
-
-Authentication
+### Frontend
 
 ```
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/forgot-password
-POST /api/auth/reset-password
+cd frontend
+npm install
+npm start
 ```
 
-Loan
+Frontend runs on:
 
 ```
+http://localhost:3000
+```
+
+---
+
+## Author
+
+Kusuma Sri
+
 POST /api/loan/apply
 GET /api/loan/history/{userId}
 ```
