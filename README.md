@@ -1,20 +1,8 @@
-# Explainable AI Loan Approval System
+# Loan Approval System
 
-A full-stack web application that simulates an intelligent loan approval platform.
-It evaluates loan applications based on income and credit score while clearly explaining the approval or rejection reason.
+A full-stack web application that evaluates loan applications and determines whether a user is eligible based on financial parameters such as **CIBIL score, income, existing loans, and employment stability**.
 
----
-
-## Features
-
-* User Registration with Email Verification
-* Secure Login with JWT Authentication
-* Forgot Password and Email Reset
-* User Dashboard with Profile Details
-* Apply for Loans (Personal, Home, Car)
-* AI-based Loan Decision Engine
-* Loan Approval / Rejection Reason
-* Loan History Tracking
+The system provides **automated loan eligibility checks and risk assessment**, similar to how banks evaluate applicants.
 
 ---
 
@@ -30,7 +18,8 @@ It evaluates loan applications based on income and credit score while clearly ex
 
 * Spring Boot
 * Spring Security
-* JWT Authentication
+* Java Mail Sender
+* REST API
 
 ### Database
 
@@ -38,35 +27,59 @@ It evaluates loan applications based on income and credit score while clearly ex
 
 ---
 
-## System Architecture
+## Features
 
-```
-React Frontend
-      ↓
-REST APIs (Spring Boot)
-      ↓
-Business Logic (Loan Decision Engine)
-      ↓
-MySQL Database
-```
+### Authentication
+
+* User Registration
+* Login
+* Email Verification
+* Forgot Password
+* Password Reset
+* BCrypt Password Encryption
+
+### Loan System
+
+* Apply for Loan
+* Loan Eligibility Check
+* Risk Score Calculation
+* Loan Approval / Rejection
+* Loan History Tracking
+
+### Dashboard
+
+* View CIBIL Score
+* View Loan Statistics
+* See Eligible Loan Types
+* Apply for Available Loans
 
 ---
 
-## Loan Decision Logic
+## Loan Eligibility Logic
 
-Loan approval is based on explainable rules:
+Loan eligibility is determined based on **CIBIL score**.
 
-* Credit Score ≥ 700 → Higher approval chance
-* Income ≥ 50% of Loan Amount → Income sufficient
-* Otherwise → Loan rejected with reason
+| CIBIL Score | Eligible Loans                 |
+| ----------- | ------------------------------ |
+| 750+        | Personal, Car, Home, Education |
+| 700–749     | Personal, Car                  |
+| 650–699     | Personal                       |
+| <650        | Not eligible                   |
 
-Example:
+---
 
-Approved
-"Excellent credit score and sufficient income."
+## Risk Score Formula
 
-Rejected
-"Low credit score or insufficient income."
+Risk Score is calculated using:
+
+Risk Score =
+(creditScore × 0.4)
+
+* (income factor × 0.3)
+
+- (existing loan × 0.2)
+
+* (employment stability × 0.1)
 
 ---
 
@@ -75,12 +88,8 @@ Rejected
 ```
 loan-approval-system
 │
-├── frontend      → React application
-│
-├── src           → Spring Boot backend
-│
-├── pom.xml       → Maven configuration
-│
+├── backend  → Spring Boot APIs
+├── frontend → React UI
 └── README.md
 ```
 
@@ -91,6 +100,7 @@ loan-approval-system
 ### Backend
 
 ```
+cd backend
 mvn spring-boot:run
 ```
 
@@ -99,8 +109,6 @@ Backend runs on:
 ```
 http://localhost:8080
 ```
-
----
 
 ### Frontend
 
@@ -118,12 +126,15 @@ http://localhost:3000
 
 ---
 
+## Future Improvements
+
+* Admin panel for loan approval
+* Risk score visualization
+* PAN verification
+* Machine learning loan prediction
+
+---
+
 ## Author
-
-Kusuma Sri
-
-POST /api/loan/apply
-GET /api/loan/history/{userId}
-```
 
 Kusuma Sri
