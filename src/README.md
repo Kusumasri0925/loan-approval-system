@@ -1,62 +1,127 @@
-# Loan Approval System - Backend
+# Backend - Loan Approval System
 
-This is the backend API built using Spring Boot.
+This backend is built using **Spring Boot** and provides REST APIs for the loan approval system.
 
-It handles authentication, loan processing, and database operations.
+## Technologies
 
----
-
-## Features
-
-* User Registration
-* Email Verification
-* Login with JWT Authentication
-* Forgot Password API
-* Loan Application Processing
-* AI Loan Decision Logic
-* Loan History API
-
----
-
-## Tech Stack
-
-* Java
 * Spring Boot
 * Spring Security
-* JWT Authentication
+* Java Mail Sender
 * MySQL
 * Maven
 
 ---
 
-## Run the Backend
+## Features
 
-```
-mvn spring-boot:run
-```
+### Authentication
 
-Backend runs on:
+* Register user
+* Login
+* Email verification
+* Forgot password
+* Reset password
 
-```
-http://localhost:8080
-```
+### Loan APIs
+
+* Apply Loan
+* View Loan History
+* Loan Eligibility Check
+* Risk Score Evaluation
 
 ---
 
 ## API Endpoints
 
-Authentication
+### Authentication
+
+Register
 
 ```
 POST /api/auth/register
+```
+
+Login
+
+```
 POST /api/auth/login
+```
+
+Verify Email
+
+```
+GET /api/auth/verify/{id}
+```
+
+Forgot Password
+
+```
 POST /api/auth/forgot-password
+```
+
+Reset Password
+
+```
 POST /api/auth/reset-password
 ```
 
-Loan
+---
+
+### Loan APIs
+
+Apply Loan
 
 ```
 POST /api/loan/apply
+```
+
+Loan History
+
+```
 GET /api/loan/history/{userId}
+```
+
+Eligible Loans
+
+```
+GET /api/loan/eligible/{cibil}
+```
+
+---
+
+## Database
+
+MySQL tables:
+
+### user
+
+* id
+* name
+* email
+* password
+* cibil_score
+* verified
+
+### loan_application
+
+* id
+* user_id
+* loan_type
+* pan_number
+* loan_amount
+* income
+* credit_score
+* existing_loan
+* years_of_employment
+* status
+* reason
+
+---
+
+## Run Backend
+
+```
+mvn spring-boot:run
+```
+
 ```
