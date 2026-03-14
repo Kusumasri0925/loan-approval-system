@@ -1,5 +1,6 @@
 package com.loanapp.controller;
-
+import java.io.IOException;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import java.util.Optional;
 
@@ -35,54 +36,66 @@ public class AuthController {
 
     // ================= REGISTER =================
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user){
+@PostMapping("/register")
+public ResponseEntity<?> register(@RequestBody User user){
 
-        Optional<User> existing = userRepository.findByEmail(user.getEmail());
+    Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
 
-        if(existing.isPresent()){
-            return ResponseEntity.badRequest().body("Email already registered");
-        }
+    if(existingUser.isPresent()){
+        return ResponseEntity.badRequest().body("Email already registered");
+    }
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setVerified(false);
+    user.setPassword(passwordEncoder.encode(user.getPassword()));
+    user.setVerified(false);
 
-        User savedUser = userRepository.save(user);
+    User savedUser = userRepository.save(user);
 
-        String verifyLink = "http://localhost:8080/api/auth/verify/" + savedUser.getId();
+    String verificationLink = "http://localhost:8080/api/auth/verify/" + savedUser.getId();
+
+    try{
 
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(savedUser.getEmail());
-        message.setSubject("Loan App Email Verification");
-        message.setText("Click the link to verify your account:\n\n" + verifyLink);
+        message.setSubject("Verify your account");
+        message.setText("Click the link to verify your account:\n" + verificationLink);
 
         mailSender.send(message);
 
-        return ResponseEntity.ok("Verification email sent");
+    }catch(Exception e){
+        System.out.println("Mail sending failed: " + e.getMessage());
     }
 
-
+    return ResponseEntity.ok("Registration successful. Verification email sent.");
+}
     // ================= VERIFY EMAIL =================
 
     @GetMapping("/verify/{id}")
-    public ResponseEntity<?> verifyUser(@PathVariable Long id){
+public String verifyUser(@PathVariable Long id){
 
-        Optional<User> userOptional = userRepository.findById(id);
+    Optional<User> userOptional = userRepository.findById(id);
 
-        if(userOptional.isEmpty()){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("User not found");
-        }
+    if(userOptional.isPresent()){
 
         User user = userOptional.get();
         user.setVerified(true);
-
         userRepository.save(user);
 
-        return ResponseEntity.ok("Email verified successfully. You can now login.");
+        return """
+        <html>
+        <head>
+        <meta http-equiv="refresh" content="3;url=http://localhost:3000/login">
+        </head>
+        <body style="font-family:Arial;text-align:center;margin-top:100px">
+        <h2>Email verified successfully ✅</h2>
+        <p>Redirecting to login page...</p>
+        </body>
+        </html>
+        """;
+
     }
 
-
+    return "Invalid verification link";
+}
     // ================= LOGIN =================
 
     @PostMapping("/login")

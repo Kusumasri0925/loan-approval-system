@@ -1,160 +1,179 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
+import Sidebar from "../components/Sidebar";
 
-function Dashboard(){
+function Dashboard() {
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
-const storedUser = JSON.parse(localStorage.getItem("user"));
-const user = storedUser?.user;
+  const [loans, setLoans] = useState([]);
+  const [eligibleLoans, setEligibleLoans] = useState([]);
 
-return(
+  useEffect(() => {
+    fetchLoans();
+    fetchEligibleLoans();
+  }, []);
 
-<div className="flex h-screen bg-gray-100">
+  // Fetch loan history
+  const fetchLoans = async () => {
+    try {
+      const res = await API.get(`/api/loan/history/${user.user.id}`);
+      setLoans(res.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-{/* Sidebar */}
+  // Fetch eligible loans based on CIBIL
+  const fetchEligibleLoans = async () => {
+    try {
 
-<div className="w-64 bg-blue-700 text-white p-6">
+      const res = await API.get(`/api/loan/eligible/${user.user.cibilScore}`);
 
-<h1 className="text-2xl font-bold mb-10">
-Loan System
-</h1>
+      setEligibleLoans(res.data);
 
-<ul className="space-y-4">
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>navigate("/dashboard")}
->
-Dashboard
-</li>
+  const appliedLoans = loans.length;
+  const approvedLoans = loans.filter(l => l.status === "APPROVED").length;
+  const rejectedLoans = loans.filter(l => l.status === "REJECTED").length;
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>navigate("/apply-loan")}
->
-Apply Loan
-</li>
+  return (
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>navigate("/loan-history")}
->
-Loan History
-</li>
+    <div className="flex min-h-screen bg-gray-100">
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>{
-localStorage.removeItem("user");
-navigate("/");
-}}
->
-Logout
-</li>
+      {/* Sidebar */}
+      <Sidebar />
 
-</ul>
+      {/* Main Section */}
+      <div className="flex-1 p-10">
 
-</div>
+        {/* Welcome Header */}
 
-{/* Main Content */}
+        <div className="bg-blue-200 p-4 rounded-lg flex justify-between items-center mb-8">
 
-<div className="flex-1 p-10">
+          <h2 className="text-xl font-semibold">
+            Welcome, {user.user.name}
+          </h2>
 
-<h1 className="text-3xl font-bold mb-6">
-Loan Dashboard
-</h1>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              navigate("/");
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Logout
+          </button>
 
-{/* Profile Card */}
+        </div>
 
-<div className="bg-white p-6 rounded-lg shadow mb-10">
+        {/* Statistics */}
 
-<h2 className="text-xl font-semibold mb-4">
-Profile Details
-</h2>
+        <div className="grid grid-cols-4 gap-6 mb-8">
 
-<p><b>User ID:</b> {user?.id}</p>
-<p><b>Name:</b> {user?.name}</p>
-<p><b>Email:</b> {user?.email}</p>
-<p><b>CIBIL Score:</b> {user?.cibilScore}</p>
+          <div className="bg-blue-400 text-white p-5 rounded-lg shadow">
 
-<button
-onClick={()=>navigate("/change-password")}
-className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
->
-Change Password
-</button>
+            <p>CIBIL Score</p>
 
-</div>
+            <h2 className="text-2xl font-bold">
+              {user.user.cibilScore}
+            </h2>
 
-{/* Loan Cards */}
+          </div>
 
-<div className="grid grid-cols-3 gap-6">
+          <div className="bg-purple-400 text-white p-5 rounded-lg shadow">
 
-<div className="bg-white p-6 rounded-lg shadow">
+            <p>Applied Loans</p>
 
-<h2 className="text-xl font-semibold">
-Personal Loan
-</h2>
+            <h2 className="text-2xl font-bold">
+              {appliedLoans}
+            </h2>
 
-<p className="text-gray-500">
-Interest Rate: 14%
-</p>
+          </div>
 
-<button
-className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-onClick={()=>navigate("/apply-loan")}
->
-Apply
-</button>
+          <div className="bg-green-400 text-white p-5 rounded-lg shadow">
 
-</div>
+            <p>Approved Loans</p>
 
-<div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-bold">
+              {approvedLoans}
+            </h2>
 
-<h2 className="text-xl font-semibold">
-Home Loan
-</h2>
+          </div>
 
-<p className="text-gray-500">
-Interest Rate: 8%
-</p>
+          <div className="bg-red-400 text-white p-5 rounded-lg shadow">
 
-<button
-className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-onClick={()=>navigate("/apply-loan")}
->
-Apply
-</button>
+            <p>Rejected Loans</p>
 
-</div>
+            <h2 className="text-2xl font-bold">
+              {rejectedLoans}
+            </h2>
 
-<div className="bg-white p-6 rounded-lg shadow">
+          </div>
 
-<h2 className="text-xl font-semibold">
-Car Loan
-</h2>
+        </div>
 
-<p className="text-gray-500">
-Interest Rate: 10%
-</p>
+        {/* Eligible Loans Section */}
 
-<button
-className="mt-4 bg-green-500 text-white px-4 py-2 rounded"
-onClick={()=>navigate("/apply-loan")}
->
-Apply
-</button>
+        <h2 className="text-2xl font-bold mb-4">
+          Available Loans For You
+        </h2>
 
-</div>
+        {eligibleLoans.length === 0 ? (
 
-</div>
+          <div className="bg-white p-6 rounded shadow text-center">
 
-</div>
+            <p className="text-red-500 font-semibold">
+              Sorry, you are currently not eligible for loans.
+            </p>
 
-</div>
+            <p className="text-gray-500 mt-2">
+              Improve your CIBIL score to apply.
+            </p>
 
-)
+          </div>
+
+        ) : (
+
+          <div className="grid grid-cols-2 gap-6">
+
+            {eligibleLoans.map((loan, index) => (
+
+              <div key={index} className="bg-white p-6 rounded-lg shadow">
+
+                <h3 className="text-lg font-bold mb-2">
+                  {loan.loanType}
+                </h3>
+
+                <p>Interest Rate: {loan.interest}</p>
+                <p>Max Amount: ₹{loan.maxAmount}</p>
+
+                <button
+                  onClick={() => navigate("/apply-loan")}
+                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+                >
+                  Apply
+                </button>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        )}
+
+      </div>
+
+    </div>
+
+  );
 
 }
 

@@ -1,52 +1,78 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
 
-function ChangePassword(){
+function ChangePassword() {
 
-const [password,setPassword] = useState("");
+  const { id } = useParams();   // get user id from URL
+  const navigate = useNavigate();
 
-const changePassword = async()=>{
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-const email = localStorage.getItem("userEmail");
+  const changePassword = async () => {
 
-await API.post("/api/auth/change-password",{
-email:email,
-password:password
-});
+    try {
 
-alert("Password Updated");
+      await API.post("/api/auth/reset-password", {
+        id: id,
+        password: password
+      });
 
-};
+      alert("Password Updated Successfully");
 
-return(
+      navigate("/login");
 
-<div className="h-screen flex items-center justify-center bg-gray-100">
+    } catch (error) {
 
-<div className="bg-white p-8 rounded shadow w-80">
+      alert("Password update failed");
 
-<h2 className="text-xl font-bold mb-4">
-Change Password
-</h2>
+    }
 
-<input
-type="password"
-placeholder="New Password"
-className="w-full border p-2 mb-4"
-onChange={(e)=>setPassword(e.target.value)}
-/>
+  };
 
-<button
-className="w-full bg-blue-500 text-white p-2 rounded"
-onClick={changePassword}
->
-Update Password
-</button>
+  return (
 
-</div>
+    <div className="h-screen flex items-center justify-center bg-gray-100">
 
-</div>
+      <div className="bg-white p-8 rounded-xl shadow-lg w-80">
 
-)
+        <h2 className="text-xl font-bold mb-4 text-center">
+          Reset Password
+        </h2>
+
+        {/* Password Field with Eye Icon */}
+
+        <div className="relative mb-4">
+
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter New Password"
+            className="w-full border p-2 rounded pr-10"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <span
+            className="absolute right-3 top-2 cursor-pointer text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁"}
+          </span>
+
+        </div>
+
+        <button
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          onClick={changePassword}
+        >
+          Update Password
+        </button>
+
+      </div>
+
+    </div>
+
+  );
 
 }
 

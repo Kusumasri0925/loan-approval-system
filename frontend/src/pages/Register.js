@@ -13,6 +13,8 @@ function Register() {
     cibilScore: ""
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
@@ -23,14 +25,15 @@ function Register() {
 
       await API.post("/api/auth/register", user);
 
-      alert("Registration Successful");
+      alert("Registration Successful. Check your email to verify your account.");
 
-      navigate("/");
+      navigate("/login");
 
     } catch (error) {
 
       console.error(error);
-      alert("Registration Failed");
+
+      alert(error.response?.data || "Registration Failed");
 
     }
 
@@ -46,6 +49,8 @@ function Register() {
           Create Account
         </h2>
 
+        {/* Name */}
+
         <input
           className="w-full p-2 border rounded mb-4"
           name="name"
@@ -53,29 +58,49 @@ function Register() {
           onChange={handleChange}
         />
 
-        <input
-type="email"
-name="email"
-placeholder="Enter Email"
-className="w-full border p-2 mb-4"
-onChange={handleChange}
-required
-/>
+        {/* Email */}
 
         <input
-          className="w-full p-2 border rounded mb-4"
-          type="password"
-          name="password"
-          placeholder="Password"
+          type="email"
+          name="email"
+          placeholder="Enter Email"
+          className="w-full border p-2 rounded mb-4"
           onChange={handleChange}
+          required
         />
+
+        {/* Password with Eye Icon */}
+
+        <div className="relative mb-4">
+
+          <input
+            className="w-full p-2 border rounded pr-10"
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Enter Password"
+            onChange={handleChange}
+          />
+
+          <span
+            className="absolute right-3 top-2 cursor-pointer text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁"}
+          </span>
+
+        </div>
+
+        {/* CIBIL Score */}
 
         <input
           className="w-full p-2 border rounded mb-4"
           name="cibilScore"
-          placeholder="CIBIL Score"
+          type="number"
+          placeholder="Enter CIBIL Score"
           onChange={handleChange}
         />
+
+        {/* Register Button */}
 
         <button
           className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
@@ -84,9 +109,11 @@ required
           Register
         </button>
 
+        {/* Login Redirect */}
+
         <p
           className="text-sm text-center mt-4 cursor-pointer text-blue-500"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/login")}
         >
           Already have an account? Login
         </p>

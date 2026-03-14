@@ -1,174 +1,159 @@
 import React, { useEffect, useState } from "react";
 import API from "../services/api";
-import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
 function LoanHistory() {
 
-const [loans,setLoans] = useState([]);
-const navigate = useNavigate();
+  const [loans, setLoans] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-useEffect(()=>{
+  useEffect(() => {
 
-const fetchLoans = async()=>{
+    const fetchLoans = async () => {
 
-try{
+      try {
 
-const storedUser = JSON.parse(localStorage.getItem("user"));
+        const storedUser = JSON.parse(localStorage.getItem("user"));
 
-const userId = storedUser.user.id;
+        if (!storedUser) {
+          alert("User not logged in");
+          return;
+        }
 
-const res = await API.get(`/api/loan/history/${userId}`);
+        const userId = storedUser.user?.id || storedUser.id;
 
-setLoans(res.data);
+        const res = await API.get(`/api/loan/history/${userId}`);
 
-}catch(error){
+        setLoans(res.data);
 
-console.log(error);
-alert("Failed to load loan history");
+      } catch (error) {
 
-}
+        console.error("Loan history error:", error);
+        alert("Failed to load loan history");
 
-};
+      } finally {
+        setLoading(false);
+      }
 
-fetchLoans();
+    };
 
-},[]);
+    fetchLoans();
 
-return(
+  }, []);
 
-<div className="flex h-screen bg-gray-100">
+  return (
 
-{/* Sidebar */}
+    <div className="flex min-h-screen bg-gray-100">
 
-<div className="w-64 bg-blue-700 text-white p-6">
+      <Sidebar />
 
-<h1 className="text-2xl font-bold mb-10">
-Loan System
-</h1>
+      <div className="flex-1 p-10">
 
-<ul className="space-y-4">
+        <h1 className="text-3xl font-bold mb-6">
+          Loan History
+        </h1>
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>navigate("/dashboard")}
->
-Dashboard
-</li>
+        <div className="bg-white p-6 rounded-lg shadow">
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>navigate("/apply-loan")}
->
-Apply Loan
-</li>
+          {loading ? (
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>navigate("/loan-history")}
->
-Loan History
-</li>
+            <p className="text-gray-500">Loading loan history...</p>
 
-<li
-className="cursor-pointer hover:text-gray-200"
-onClick={()=>{
-localStorage.removeItem("user");
-navigate("/");
-}}
->
-Logout
-</li>
+          ) : (
 
-</ul>
+            <table className="w-full">
 
-</div>
+              <thead>
 
-{/* Main Content */}
+                <tr className="border-b bg-gray-200">
 
-<div className="flex-1 p-10">
+                  <th className="p-3 text-left">Loan Type</th>
+                  <th className="p-3 text-left">Amount</th>
+                  <th className="p-3 text-left">Income</th>
+                  <th className="p-3 text-left">Credit Score</th>
+                  <th className="p-3 text-left">Existing Loan</th>
+                  <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Reason</th>
 
-<h1 className="text-3xl font-bold mb-6">
-Loan History
-</h1>
+                </tr>
 
-<div className="bg-white p-6 rounded-lg shadow">
+              </thead>
 
-<table className="w-full">
+              <tbody>
 
-<thead>
+                {loans.length === 0 ? (
 
-<tr className="border-b">
+                  <tr>
+                    <td colSpan="7" className="text-center p-4 text-gray-500">
+                      No loan history found
+                    </td>
+                  </tr>
 
-<th className="p-2 text-left">Loan Type</th>
-<th className="p-2 text-left">Amount</th>
-<th className="p-2 text-left">Income</th>
-<th className="p-2 text-left">Credit Score</th>
-<th className="p-2 text-left">Status</th>
-<th className="p-2 text-left">Reason</th>
+                ) : (
 
-</tr>
+                  loans.map((loan) => (
 
-</thead>
+                    <tr key={loan.id} className="border-b hover:bg-gray-50">
 
-<tbody>
+                      <td className="p-3">{loan.loanType || "N/A"}</td>
 
-{loans.length === 0 ? (
+                      <td className="p-3">
+                        ₹{loan.loanAmount || 0}
+                      </td>
 
-<tr>
-<td colSpan="6" className="text-center p-4 text-gray-500">
-No loan history found
-</td>
-</tr>
+                      <td className="p-3">
+                        ₹{loan.income || 0}
+                      </td>
 
-) : (
+                      <td className="p-3">
+                        {loan.creditScore || "N/A"}
+                      </td>
 
-loans.map((loan)=>(
-<tr key={loan.id} className="border-b">
+                      <td className="p-3">
+                        ₹{loan.existingLoan || 0}
+                      </td>
 
-<td className="p-2">{loan.loanType}</td>
+                      <td className="p-3">
 
-<td className="p-2">
-₹{loan.loanAmount}
-</td>
+                        {loan.status === "APPROVED" ? (
 
-<td className="p-2">
-₹{loan.income}
-</td>
+                          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            Approved
+                          </span>
 
-<td className="p-2">
-{loan.creditScore}
-</td>
+                        ) : (
 
-<td
-className={
-loan.status === "APPROVED"
-? "p-2 text-green-600 font-bold"
-: "p-2 text-red-600 font-bold"
-}
->
-{loan.status}
-</td>
+                          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            Rejected
+                          </span>
 
-<td className="p-2 text-gray-600">
-{loan.reason}
-</td>
+                        )}
 
-</tr>
-))
+                      </td>
 
-)}
+                      <td className="p-3 text-gray-600">
+                        {loan.reason || "No reason provided"}
+                      </td>
 
-</tbody>
+                    </tr>
 
-</table>
+                  ))
 
-</div>
+                )}
 
-</div>
+              </tbody>
 
-</div>
+            </table>
 
-);
+          )}
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
 
 }
 

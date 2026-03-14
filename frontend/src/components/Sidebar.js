@@ -1,58 +1,69 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Sidebar() {
 
-  const navigate = useNavigate();
+const navigate = useNavigate();
+const location = useLocation();
 
-  const logout = () => {
-    localStorage.removeItem("userEmail");
-    navigate("/");
-  };
+return (
 
-  return (
+<div className="w-64 bg-gray-100 min-h-screen p-6 shadow">
 
-    <div className="w-60 h-screen bg-blue-600 text-white p-6">
+<h2 className="text-xl font-bold mb-8">
+Loan Approval Dashboard
+</h2>
 
-      <h2 className="text-2xl font-bold mb-10">
-        Loan System
-      </h2>
+<ul className="space-y-4">
 
-      <ul className="space-y-4">
+<li
+onClick={() => navigate("/dashboard")}
+className={`cursor-pointer p-2 rounded ${
+location.pathname === "/dashboard"
+? "bg-blue-200 font-semibold"
+: ""
+}`}
+>
+Dashboard
+</li>
 
-        <li
-          className="cursor-pointer hover:text-gray-200"
-          onClick={() => navigate("/dashboard")}
-        >
-          Dashboard
-        </li>
+<li
+onClick={() => navigate("/apply-loan")}
+className={`cursor-pointer p-2 rounded ${
+location.pathname === "/apply-loan"
+? "bg-blue-200 font-semibold"
+: ""
+}`}
+>
+Available Loans
+</li>
 
-        <li
-          className="cursor-pointer hover:text-gray-200"
-          onClick={() => navigate("/apply-loan")}
-        >
-          Apply Loan
-        </li>
+<li
+onClick={() => navigate("/loan-history")}
+className={`cursor-pointer p-2 rounded ${
+location.pathname === "/loan-history"
+? "bg-blue-200 font-semibold"
+: ""
+}`}
+>
+Applied Loans
+</li>
 
-        <li
-          className="cursor-pointer hover:text-gray-200"
-          onClick={() => navigate("/loan-history")}
-        >
-          Loan History
-        </li>
+<li
+className="cursor-pointer text-red-500 mt-10"
+onClick={()=>{
+localStorage.clear();
+navigate("/");
+}}
+>
+Logout
+</li>
 
-        <li
-          className="cursor-pointer hover:text-gray-200"
-          onClick={logout}
-        >
-          Logout
-        </li>
+</ul>
 
-      </ul>
+</div>
 
-    </div>
-
-  );
+);
 
 }
 

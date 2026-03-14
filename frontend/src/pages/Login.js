@@ -4,103 +4,113 @@ import { useNavigate } from "react-router-dom";
 
 function Login() {
 
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-const [user,setUser] = useState({
-email:"",
-password:""
-});
+  const [user, setUser] = useState({
+    email: "",
+    password: ""
+  });
 
-const [showPassword,setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-const handleChange=(e)=>{
-setUser({...user,[e.target.name]:e.target.value});
-};
+  const handleChange = (e) => {
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
 
-const login = async () => {
+  const login = async () => {
 
-  try {
+    try {
 
-    const res = await API.post("/api/auth/login", user);
+      const res = await API.post("/api/auth/login", user);
 
-    // store user
-    localStorage.setItem("user", JSON.stringify(res.data));
+      // store user
+      localStorage.setItem("user", JSON.stringify(res.data));
 
-    alert("Login Successful");
+      alert("Login Successful");
 
-    navigate("/dashboard");
+      navigate("/dashboard");
 
-  } catch (error) {
+    } catch (error) {
 
-    alert(error.response?.data || "Login failed");
+      alert(error.response?.data || "Login failed");
 
-  }
+    }
 
-};
+  };
 
-return(
+  return (
 
-<div className="h-screen flex items-center justify-center bg-gray-100">
+    <div className="h-screen flex items-center justify-center bg-gray-100">
 
-<div className="bg-white p-8 rounded-xl shadow-lg w-80">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-80">
 
-<h2 className="text-2xl font-bold text-center mb-6">
-Login
-</h2>
+        <h2 className="text-2xl font-bold text-center mb-6">
+          Login
+        </h2>
 
-<input
-className="w-full p-2 border rounded mb-4"
-name="email"
-type="email"
-placeholder="Email"
-onChange={handleChange}
-/>
+        {/* Email */}
 
-<div className="flex">
+        <input
+          className="w-full p-2 border rounded mb-4"
+          name="email"
+          type="email"
+          placeholder="Enter Email"
+          onChange={handleChange}
+        />
 
-<input
-className="w-full p-2 border rounded mb-4"
-name="password"
-type={showPassword ? "text" : "password"}
-placeholder="Password"
-onChange={handleChange}
-/>
+        {/* Password with Eye Icon */}
 
-<button
-className="ml-2 text-blue-500"
-onClick={()=>setShowPassword(!showPassword)}
->
-{showPassword ? "Hide" : "Show"}
-</button>
+        <div className="relative mb-4">
 
-</div>
+          <input
+            className="w-full p-2 border rounded pr-10"
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter Password"
+            onChange={handleChange}
+          />
 
-<p
-className="text-blue-500 cursor-pointer mb-4 text-sm"
-onClick={()=>navigate("/forgot-password")}
->
-Forgot Password?
-</p>
+          <span
+            className="absolute right-3 top-2 cursor-pointer text-gray-600"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? "🙈" : "👁"}
+          </span>
 
-<button
-className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-onClick={login}
->
-Login
-</button>
+        </div>
 
-<button
-className="w-full bg-green-500 text-white p-2 rounded mt-3 hover:bg-green-600"
-onClick={()=>navigate("/register")}
->
-Register
-</button>
+        {/* Forgot Password */}
 
-</div>
+        <p
+          className="text-blue-500 cursor-pointer mb-4 text-sm text-right"
+          onClick={() => navigate("/forgot-password")}
+        >
+          Forgot Password?
+        </p>
 
-</div>
+        {/* Login Button */}
 
-)
+        <button
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          onClick={login}
+        >
+          Login
+        </button>
+
+        {/* Register Button */}
+
+        <button
+          className="w-full bg-green-500 text-white p-2 rounded mt-3 hover:bg-green-600"
+          onClick={() => navigate("/register")}
+        >
+          Register
+        </button>
+
+      </div>
+
+    </div>
+
+  );
 
 }
 

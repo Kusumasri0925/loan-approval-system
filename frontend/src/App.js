@@ -6,36 +6,42 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ApplyLoan from "./pages/ApplyLoan";
 import LoanHistory from "./pages/LoanHistory";
+import LoanResult from "./pages/LoanResult";
 import ForgotPassword from "./pages/ForgotPassword";
 import ChangePassword from "./pages/ChangePassword";
 
-function App(){
+function App() {
 
-return(
+  return (
 
-<Router>
+    <Router>
 
-<Routes>
+      <Routes>
 
-<Route path="/" element={<Login/>} />
+        {/* Login */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
 
-<Route path="/register" element={<Register/>} />
+        {/* Authentication */}
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
-<Route path="/dashboard" element={<Dashboard/>} />
+        {/* Reset Password (IMPORTANT FIX) */}
+        <Route path="/reset-password/:id" element={<ChangePassword />} />
 
-<Route path="/apply-loan" element={<ApplyLoan/>} />
+        {/* Dashboard */}
+        <Route path="/dashboard" element={<Dashboard />} />
 
-<Route path="/loan-history" element={<LoanHistory/>} />
+        {/* Loan Pages */}
+        <Route path="/apply-loan" element={<ApplyLoan />} />
+        <Route path="/loan-history" element={<LoanHistory />} />
+        <Route path="/loan-result" element={<LoanResult />} />
 
-<Route path="/forgot-password" element={<ForgotPassword/>} />
+      </Routes>
 
-<Route path="/change-password" element={<ChangePassword/>} />
+    </Router>
 
-</Routes>
-
-</Router>
-
-)
+  );
 
 }
 

@@ -1,94 +1,169 @@
 import React, { useState } from "react";
 import API from "../services/api";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
 
-function ApplyLoan(){
+function ApplyLoan() {
 
-const [loan,setLoan] = useState({
-loanType:"",
-loanAmount:"",
-income:"",
-creditScore:""
-});
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user"));
 
-const handleChange = (e)=>{
-setLoan({...loan,[e.target.name]:e.target.value});
-};
+  const [loan, setLoan] = useState({
+    loanType: "",
+    loanAmount: "",
+    income: "",
+    creditScore: "",
+    panNumber: "",
+    existingLoan: "",
+    yearsOfEmployment: ""
+  });
 
-const applyLoan = async () => {
+  const handleChange = (e) => {
+    setLoan({ ...loan, [e.target.name]: e.target.value });
+  };
 
-  try {
+  const applyLoan = async () => {
 
-    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (
+      !loan.loanType ||
+      !loan.loanAmount ||
+      !loan.income ||
+      !loan.creditScore ||
+      !loan.panNumber ||
+      !loan.yearsOfEmployment
+    ) {
+      alert("Please fill all fields");
+      return;
+    }
 
-    const userId = storedUser.user.id;
+    try {
 
-    const response = await API.post("/api/loan/apply", {
-      userId: userId,
-      loanType: loan.loanType,
-      loanAmount: Number(loan.loanAmount),
-      income: Number(loan.income),
-      creditScore: Number(loan.creditScore)
-    });
+      const res = await API.post("/api/loan/apply", {
+        ...loan,
+        userId: user.user.id
+      });
 
-    alert("Loan Applied Successfully");
+      navigate("/loan-result", { state: res.data });
 
-  } catch (error) {
+    } catch (error) {
 
-    console.error(error);
+      alert("Loan Application Failed");
 
-    alert("Loan Application Failed");
+    }
 
-  }
+  };
 
-};
-return(
+  return (
 
-<div style={{padding:"40px"}}>
+    <div className="flex min-h-screen bg-gray-100">
 
-<h1>Apply Loan</h1>
+      <Sidebar />
 
-<select name="loanType" onChange={handleChange}>
+      <div className="flex-1 flex items-center justify-center">
 
-<option value="">Select Loan Type</option>
-<option value="Personal Loan">Personal Loan</option>
-<option value="Home Loan">Home Loan</option>
-<option value="Car Loan">Car Loan</option>
+        <div className="bg-white w-[450px] p-8 rounded-xl shadow-lg">
 
-</select>
+          <h1 className="text-2xl font-bold text-center mb-6">
+            Apply Loan
+          </h1>
 
-<br/><br/>
+          {/* Loan Type */}
 
-<input
-name="loanAmount"
-placeholder="Loan Amount"
-onChange={handleChange}
-/>
+          <select
+            name="loanType"
+            value={loan.loanType}
+            onChange={handleChange}
+            className="w-full border p-3 mb-4 rounded"
+          >
+            <option value="">Select Loan Type</option>
+            <option value="Personal Loan">Personal Loan</option>
+            <option value="Home Loan">Home Loan</option>
+            <option value="Car Loan">Car Loan</option>
+            <option value="Education Loan">Education Loan</option>
+          </select>
 
-<br/><br/>
+          {/* PAN Number */}
 
-<input
-name="income"
-placeholder="Monthly Income"
-onChange={handleChange}
-/>
+          <input
+            type="text"
+            name="panNumber"
+            placeholder="Enter PAN Number (ABCDE1234F)"
+            value={loan.panNumber}
+            onChange={handleChange}
+            className="w-full border p-3 mb-4 rounded"
+          />
 
-<br/><br/>
+          {/* Loan Amount */}
 
-<input
-name="creditScore"
-placeholder="Credit Score"
-onChange={handleChange}
-/>
+          <input
+            type="number"
+            name="loanAmount"
+            placeholder="Loan Amount"
+            value={loan.loanAmount}
+            onChange={handleChange}
+            className="w-full border p-3 mb-4 rounded"
+          />
 
-<br/><br/>
+          {/* Monthly Income */}
 
-<button onClick={applyLoan}>
-Apply Loan
-</button>
+          <input
+            type="number"
+            name="income"
+            placeholder="Monthly Income"
+            value={loan.income}
+            onChange={handleChange}
+            className="w-full border p-3 mb-4 rounded"
+          />
 
-</div>
+          {/* Existing Loan */}
 
-);
+          <input
+            type="number"
+            name="existingLoan"
+            placeholder="Existing Loan Amount (if any)"
+            value={loan.existingLoan}
+            onChange={handleChange}
+            className="w-full border p-3 mb-4 rounded"
+          />
+
+          {/* Credit Score */}
+
+          <input
+            type="number"
+            name="creditScore"
+            placeholder="Credit Score (300-900)"
+            value={loan.creditScore}
+            onChange={handleChange}
+            className="w-full border p-3 mb-4 rounded"
+          />
+
+          {/* Years of Employment */}
+
+          <input
+            type="number"
+            name="yearsOfEmployment"
+            placeholder="Years of Employment"
+            value={loan.yearsOfEmployment}
+            onChange={handleChange}
+            className="w-full border p-3 mb-6 rounded"
+          />
+
+          {/* Apply Button */}
+
+          <button
+            onClick={applyLoan}
+            className="w-full bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
+          >
+            Apply Loan
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  );
 
 }
 
