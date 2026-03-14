@@ -1,46 +1,61 @@
-# Loan Approval System - Frontend
+# Frontend - Loan Approval System
 
-This is the frontend application built using React.
+This is the frontend application built using **React.js**.
 
-It provides the user interface for interacting with the loan approval system.
-
----
-
-## Features
-
-* User Login and Registration
-* Email Verification
-* Forgot Password Reset
-* Dashboard with User Profile
-* Apply for Loans
-* View Loan Application History
-* AI Loan Decision Display
+It provides a user interface for applying and managing loans.
 
 ---
 
-## Tech Stack
+## Technologies
 
 * React.js
 * Tailwind CSS
 * Axios
+* React Router
 
 ---
 
-## Running the Frontend
+## Pages
 
-Install dependencies:
+### Authentication
+
+* Login
+* Register
+* Forgot Password
+* Reset Password
+
+---
+
+### Dashboard
+
+Shows:
+
+* User CIBIL score
+* Applied loans
+* Approved loans
+* Rejected loans
+* Available loan types
+
+---
+
+### Loan System
+
+Users can:
+
+* Apply for loan
+* View loan history
+* Check eligibility
+
+---
+
+## Run Frontend
 
 ```
 npm install
-```
-
-Start the development server:
-
-```
 npm start
 ```
 
-The application runs at:
+App runs on:
 
 ```
 http://localhost:3000
@@ -53,16 +68,20 @@ http://localhost:3000
 ```
 src
 │
-├── pages
-│   ├── Login
-│   ├── Register
-│   ├── Dashboard
-│   ├── ApplyLoan
-│   └── LoanHistory
-│
 ├── components
-│   └── Sidebar
+│   └── Sidebar.js
+│
+├── pages
+│   ├── Login.js
+│   ├── Register.js
+│   ├── Dashboard.js
+│   ├── ApplyLoan.js
+│   ├── LoanHistory.js
+│   ├── LoanResult.js
+│   └── ChangePassword.js
 │
 └── services
     └── api.js
+```
+
 ```
