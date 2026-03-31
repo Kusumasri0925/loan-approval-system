@@ -4,8 +4,6 @@ import com.loanapp.model.LoanOffer;
 import com.loanapp.model.LoanApplication;
 import com.loanapp.repository.LoanRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
 
 import java.util.*;
 
@@ -49,79 +47,54 @@ public class LoanService {
                 throw new RuntimeException("Income must be greater than zero");
             }
 
-            // ================= SHAP CALL =================
-            Map<String, Double> shapValues = new HashMap<>();
-
-            try {
-                RestTemplate restTemplate = new RestTemplate();
-
-                String url = "http://127.0.0.1:5001/predict";
-
-                Map<String, Object> request = Map.of(
-                        "creditScore", creditScore,
-                        "income", income,
-                        "existingLoan", existingLoan,
-                        "employment", employment
-                );
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-
-                HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
-
-                ResponseEntity<Map> response =
-                        restTemplate.postForEntity(url, entity, Map.class);
-
-                Map<String, Object> body = response.getBody();
-
-                if (body != null && body.get("explanation") != null) {
-                    Map<String, Object> shap =
-                            (Map<String, Object>) body.get("explanation");
-
-                    shap.forEach((k, v) ->
-                            shapValues.put(k, Double.parseDouble(v.toString()))
-                    );
-                }
-
-            } catch (Exception e) {
-                System.out.println("SHAP error: " + e.getMessage());
-            }
-
             // ================= EMI RULE =================
             double emi = calculateEMI(loanAmount, 10.0, 60);
             double emiRatio = emi / income;
 
             loan.setEmi(emi);
 
+            // ================= BASIC AI LOGIC =================
+            String status;
+            String reason;
+            double riskScore;
+
             if (emiRatio > 0.4) {
 
-                loan.setStatus("REJECTED");
-                loan.setReason("EMI exceeds 40% of monthly income");
-                loan.setRiskScore(100.0);
-                loan.setExplanation(generateReadableExplanation(shapValues));
+                status = "REJECTED";
+                reason = "EMI exceeds 40% of income";
+                riskScore = 90;
 
-                return loanRepository.save(loan);
-            }
+            } else if (creditScore >= 750 && income > 50000) {
 
-            // ================= SCORE =================
-            double score =
-                    creditScore * 0.4 +
-                    (income / 10000) * 0.3 -
-                    (existingLoan / 10000) * 0.2 +
-                    employment * 0.1;
+                status = "APPROVED";
+                reason = "Excellent credit score and high income";
+                riskScore = 20;
 
-            loan.setRiskScore(score);
+            } else if (creditScore >= 700 && income > 30000) {
 
-            if(score >= 250){
-                loan.setStatus("APPROVED");
-                loan.setReason("Low risk applicant");
+                status = "APPROVED";
+                reason = "Good credit score and stable income";
+                riskScore = 35;
+
+            } else if (creditScore >= 650 && income > 20000) {
+
+                status = "APPROVED";
+                reason = "Moderate credit profile";
+                riskScore = 50;
+
             } else {
-                loan.setStatus("REJECTED");
-                loan.setReason("High risk applicant");
+
+                status = "REJECTED";
+                reason = "Low credit score or insufficient income";
+                riskScore = 75;
             }
 
-            // ✅ ONLY SHAP EXPLANATION
-            loan.setExplanation(generateReadableExplanation(shapValues));
+            loan.setStatus(status);
+            loan.setReason(reason);
+            loan.setRiskScore(riskScore);
+
+            // ================= HUMAN READABLE EXPLANATION =================
+            loan.setExplanation(generateExplanation(loan, emiRatio));
 
             return loanRepository.save(loan);
 
@@ -130,43 +103,35 @@ public class LoanService {
         }
     }
 
-    // ================= 🔥 HUMAN READABLE SHAP =================
-    private String generateReadableExplanation(Map<String, Double> shapValues) {
+    // ================= CLEAN EXPLANATION =================
+    private String generateExplanation(LoanApplication loan, double emiRatio) {
 
         StringBuilder explanation = new StringBuilder("AI Analysis:\n");
 
-        for (Map.Entry<String, Double> entry : shapValues.entrySet()) {
+        if (loan.getCreditScore() >= 700) {
+            explanation.append("• Your credit score is strong.\n");
+        } else {
+            explanation.append("• Your credit score is low.\n");
+        }
 
-            String feature = entry.getKey();
-            double value = entry.getValue();
+        if (loan.getIncome() > 30000) {
+            explanation.append("• Your income is stable.\n");
+        } else {
+            explanation.append("• Your income is low.\n");
+        }
 
-            if (feature.equals("income")) {
-                if (value < 0)
-                    explanation.append("• Your income is low, increasing risk.\n");
-                else
-                    explanation.append("• Your income is strong, supporting approval.\n");
-            }
+        if (loan.getExistingLoan() > 50000) {
+            explanation.append("• You already have high existing loans.\n");
+        }
 
-            else if (feature.equals("creditScore")) {
-                if (value < 0)
-                    explanation.append("• Your credit score is low.\n");
-                else
-                    explanation.append("• Your credit score is good.\n");
-            }
+        if (loan.getYearsOfEmployment() >= 2) {
+            explanation.append("• Your employment history is stable.\n");
+        } else {
+            explanation.append("• Your employment history is short.\n");
+        }
 
-            else if (feature.equals("existingLoan")) {
-                if (value < 0)
-                    explanation.append("• You already have high existing loans.\n");
-                else
-                    explanation.append("• Your existing loan burden is low.\n");
-            }
-
-            else if (feature.equals("employment")) {
-                if (value < 0)
-                    explanation.append("• Your employment history is unstable.\n");
-                else
-                    explanation.append("• Your employment history is stable.\n");
-            }
+        if (emiRatio > 0.4) {
+            explanation.append("• EMI is too high compared to your income.\n");
         }
 
         return explanation.toString();
