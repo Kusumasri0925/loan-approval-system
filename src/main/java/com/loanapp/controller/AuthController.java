@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+
+// ✅ FIXED CORS (ALLOW ALL ORIGIN)
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     @Autowired
@@ -65,37 +67,21 @@ public class AuthController {
 
         User savedUser = userRepository.save(user);
 
-        String verificationLink = "http://localhost:8080/api/auth/verify/" + savedUser.getId();
+        // 🔥 USE FRONTEND URL (NOT LOCALHOST 8080)
+        String verificationLink = "https://your-frontend-url.vercel.app/login?verified=true";
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(savedUser.getEmail());
             message.setSubject("Verify your account");
-            message.setText("Click the link to verify your account:\n\n" + verificationLink);
+            message.setText("Your account is created successfully.\n\nYou can now login.");
 
             mailSender.send(message);
         } catch(Exception e){
             System.out.println("Mail sending failed: " + e.getMessage());
         }
 
-        return ResponseEntity.ok("Registration successful. Please verify your email.");
-    }
-
-    // ================= VERIFY =================
-    @GetMapping("/verify/{id}")
-    public void verifyUser(@PathVariable Long id, HttpServletResponse response) throws IOException {
-
-        Optional<User> userOptional = userRepository.findById(id);
-
-        if(userOptional.isPresent()){
-            User user = userOptional.get();
-            user.setVerified(true);
-            userRepository.save(user);
-
-            response.sendRedirect("http://localhost:5173/login?verified=true");
-        } else {
-            response.sendRedirect("http://localhost:5173/login?error=invalid_link");
-        }
+        return ResponseEntity.ok("Registration successful. You can login now.");
     }
 
     // ================= LOGIN =================
@@ -111,11 +97,6 @@ public class AuthController {
 
         User user = userOptional.get();
 
-        if(!user.isVerified()){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Please verify your email before login");
-        }
-
         if(!passwordEncoder.matches(loginUser.getPassword(), user.getPassword())){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid password");
@@ -123,7 +104,6 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(user.getEmail());
 
-        // ✅ SAFE RESPONSE (NO PASSWORD)
         return ResponseEntity.ok(Map.of(
                 "token", token,
                 "user", Map.of(
@@ -131,7 +111,7 @@ public class AuthController {
                         "name", user.getName(),
                         "email", user.getEmail(),
                         "cibilScore", user.getCibilScore(),
-                        "income", user.getIncome(),   // ✅ IMPORTANT
+                        "income", user.getIncome(),
                         "verified", user.isVerified()
                 )
         ));
@@ -152,7 +132,7 @@ public class AuthController {
 
         User user = userOptional.get();
 
-        String resetLink = "http://localhost:5173/reset-password/" + user.getId();
+        String resetLink = "https://your-frontend-url.vercel.app/reset-password/" + user.getId();
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();

@@ -11,6 +11,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/loan")
+
+// ✅ Allow frontend (for now allow all)
 @CrossOrigin(origins = "*")
 public class LoanController {
 
@@ -23,12 +25,23 @@ public class LoanController {
     // ================= APPLY LOAN =================
     @PostMapping("/apply")
     public LoanApplication applyLoan(@RequestBody LoanApplication loan) {
+
+        // Optional validation
+        if (loan.getUserId() == null) {
+            throw new RuntimeException("User ID is required");
+        }
+
         return loanService.applyLoan(loan);
     }
 
-    // ================= HISTORY =================
+    // ================= LOAN HISTORY =================
     @GetMapping("/history/{userId}")
     public List<LoanApplication> getLoanHistory(@PathVariable Long userId) {
+
+        if (userId == null) {
+            throw new RuntimeException("User ID is required");
+        }
+
         return loanService.getLoanHistory(userId);
     }
 
@@ -40,15 +53,27 @@ public class LoanController {
             @RequestParam double existingLoan,
             @RequestParam int yearsOfEmployment
     ) {
-        return loanService.getLoanOffers(creditScore, income, existingLoan, yearsOfEmployment);
+
+        return loanService.getLoanOffers(
+                creditScore,
+                income,
+                existingLoan,
+                yearsOfEmployment
+        );
     }
 
-    // ================= ✅ FIXED ELIGIBLE LOANS =================
+    // ================= ELIGIBLE LOANS (IMPORTANT FIX) =================
     @GetMapping("/eligible")
     public List<Map<String, Object>> getEligibleLoans(
             @RequestParam int cibilScore,
             @RequestParam double income
     ) {
+
+        // ✅ validation
+        if (cibilScore <= 0 || income <= 0) {
+            throw new RuntimeException("Invalid input for eligibility");
+        }
+
         return loanService.getEligibleLoans(cibilScore, income);
     }
 }
