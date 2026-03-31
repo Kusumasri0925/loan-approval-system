@@ -1,7 +1,7 @@
 package com.loanapp.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "user")
@@ -11,16 +11,30 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ✅ NAME VALIDATION
+    @NotBlank(message = "Name is required")
     private String name;
 
-    @Column(unique = true)
+    // ✅ EMAIL VALIDATION (GMAIL ONLY)
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Email is required")
+    @Pattern(
+        regexp = "^[a-zA-Z0-9._%+-]+@gmail\\.com$",
+        message = "Only valid Gmail addresses are allowed"
+    )
     private String email;
 
+    // ✅ PASSWORD VALIDATION
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
+    // ✅ CIBIL VALIDATION
+    @Min(value = 300, message = "CIBIL score must be at least 300")
+    @Max(value = 900, message = "CIBIL score must be at most 900")
     private int cibilScore;
 
-    // ✅ NEW FIELD (IMPORTANT)
+    // ✅ INCOME VALIDATION
     @Column(nullable = false)
     @Min(value = 1000, message = "Income must be at least 1000")
     private double income;
@@ -31,8 +45,8 @@ public class User {
 
     private String address;
 
-    // email verification field
-    private boolean verified = false;
+    // ✅ AUTO VERIFIED (since we removed email system)
+    private boolean verified = true;
 
     public User() {}
 
@@ -40,10 +54,6 @@ public class User {
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -54,12 +64,17 @@ public class User {
         this.name = name;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getEmail() {
         return email;
     }
 
+    // ✅ Ensure lowercase email
     public void setEmail(String email) {
-        this.email = email;
+        this.email = email.toLowerCase();
     }
 
     public String getPassword() {
@@ -78,7 +93,6 @@ public class User {
         this.cibilScore = cibilScore;
     }
 
-    // ✅ INCOME GETTER & SETTER
     public double getIncome() {
         return income;
     }

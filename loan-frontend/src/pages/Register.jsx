@@ -11,7 +11,7 @@ function Register() {
     email: "",
     password: "",
     cibilScore: "",
-    income: ""   // ✅ ADDED
+    income: ""
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -23,14 +23,30 @@ function Register() {
 
   const register = async () => {
 
-    // ✅ UPDATED VALIDATION
+    // ✅ Gmail validation regex
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
+    // ✅ Required fields
     if (!user.name || !user.email || !user.password || !user.cibilScore || !user.income) {
       alert("Please fill all fields");
       return;
     }
 
+    // ✅ Gmail validation
+    if (!gmailRegex.test(user.email)) {
+      alert("Please enter a valid Gmail address");
+      return;
+    }
+
+    // ✅ Income validation
     if (user.income < 1000) {
-      alert("Income must be at least 1000");
+      alert("Income must be at least ₹1000");
+      return;
+    }
+
+    // ✅ CIBIL validation
+    if (user.cibilScore < 300 || user.cibilScore > 900) {
+      alert("CIBIL score must be between 300 and 900");
       return;
     }
 
@@ -81,7 +97,7 @@ function Register() {
         <input
           type="email"
           name="email"
-          placeholder="Enter Email"
+          placeholder="Enter Gmail (example@gmail.com)"
           className="w-full border p-2 rounded mb-4"
           value={user.email}
           onChange={handleChange}
@@ -111,12 +127,12 @@ function Register() {
           className="w-full p-2 border rounded mb-4"
           name="cibilScore"
           type="number"
-          placeholder="Enter CIBIL Score"
+          placeholder="Enter CIBIL Score (300-900)"
           value={user.cibilScore}
           onChange={handleChange}
         />
 
-        {/* ✅ NEW: INCOME FIELD */}
+        {/* Income */}
         <input
           className="w-full p-2 border rounded mb-4"
           name="income"
@@ -129,7 +145,7 @@ function Register() {
         {/* Register Button */}
         <button
           disabled={loading}
-          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
+          className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600 transition"
           onClick={register}
         >
           {loading ? "Registering..." : "Register"}
