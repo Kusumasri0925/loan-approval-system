@@ -22,9 +22,9 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Password */}
+        {/* Password (✅ FIXED) */}
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:id" element={<ChangePassword />} />
+        <Route path="/reset-password" element={<ChangePassword />} />
 
         {/* Dashboard */}
         <Route path="/dashboard" element={<Dashboard />} />

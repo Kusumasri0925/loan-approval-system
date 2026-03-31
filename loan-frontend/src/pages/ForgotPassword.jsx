@@ -1,54 +1,82 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import API from "../services/api";
+import { useNavigate } from "react-router-dom";
 
-function ForgotPassword(){
+function ForgotPassword() {
 
-const [email,setEmail] = useState("");
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
-const sendLink = async()=>{
+  const navigate = useNavigate();
 
-try{
+  const sendLink = async () => {
 
-await API.post("/api/auth/forgot-password",{email});
+    // ✅ Gmail validation
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
-alert("Reset link sent to email");
+    if (!email) {
+      alert("Please enter email");
+      return;
+    }
 
-}catch(error){
+    if (!gmailRegex.test(email)) {
+      alert("Enter valid Gmail address");
+      return;
+    }
 
-alert("User not found");
+    if (loading) return;
 
-}
+    setLoading(true);
 
-};
+    try {
 
-return(
+      await API.post("/api/auth/forgot-password", { email });
 
-<div className="h-screen flex items-center justify-center bg-gray-100">
+      alert("Email verified. Now reset your password.");
 
-<div className="bg-white p-8 rounded shadow w-80">
+      // ✅ Move to reset page
+      navigate("/reset-password");
 
-<h2 className="text-xl font-bold mb-4">
-Forgot Password
-</h2>
+    } catch (error) {
 
-<input
-className="w-full border p-2 mb-4"
-placeholder="Enter Email"
-onChange={(e)=>setEmail(e.target.value)}
-/>
+      alert(error.response?.data || "User not found");
 
-<button
-className="w-full bg-blue-500 text-white p-2 rounded"
-onClick={sendLink}
->
-Send Reset Link
-</button>
+    } finally {
+      setLoading(false);
+    }
 
-</div>
+  };
 
-</div>
+  return (
 
-)
+    <div className="h-screen flex items-center justify-center bg-gray-100">
+
+      <div className="bg-white p-8 rounded shadow w-80">
+
+        <h2 className="text-xl font-bold mb-4">
+          Forgot Password
+        </h2>
+
+        <input
+          className="w-full border p-2 mb-4"
+          placeholder="Enter Gmail"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <button
+          disabled={loading}
+          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 transition"
+          onClick={sendLink}
+        >
+          {loading ? "Checking..." : "Continue"}
+        </button>
+
+      </div>
+
+    </div>
+
+  );
 
 }
 
