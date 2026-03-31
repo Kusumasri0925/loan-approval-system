@@ -20,7 +20,7 @@ public class CorsConfig {
                         // ✅ Allow both local + deployed frontend
                         .allowedOrigins(
                                 "http://localhost:5173",
-                                "https://your-frontend-url.vercel.app"
+                                "https://loan-approval-system-six.vercel.app/"
                         )
 
                         // ✅ Allow all required methods
