@@ -1,7 +1,5 @@
 package com.loanapp.controller;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -12,15 +10,13 @@ import com.loanapp.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 
-// ✅ FIXED CORS (ALLOW ALL ORIGIN)
+// ✅ Allow frontend (local + deployed)
 @CrossOrigin(origins = "*")
 public class AuthController {
 
@@ -29,9 +25,6 @@ public class AuthController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -48,40 +41,28 @@ public class AuthController {
                     .body("Email already registered");
         }
 
-        // ✅ VALIDATE INCOME
+        // ✅ VALIDATIONS
         if(user.getIncome() <= 0){
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Income must be greater than 0");
         }
 
-        // ✅ VALIDATE CIBIL
         if(user.getCibilScore() < 300 || user.getCibilScore() > 900){
             return ResponseEntity
                     .status(HttpStatus.BAD_REQUEST)
                     .body("Invalid CIBIL score");
         }
 
+        // ✅ Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setVerified(false);
 
-        User savedUser = userRepository.save(user);
+        // 🔥 AUTO VERIFY (NO EMAIL)
+        user.setVerified(true);
 
-        // 🔥 USE FRONTEND URL (NOT LOCALHOST 8080)
-        String verificationLink = "https://your-frontend-url.vercel.app/login?verified=true";
+        userRepository.save(user);
 
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(savedUser.getEmail());
-            message.setSubject("Verify your account");
-            message.setText("Your account is created successfully.\n\nYou can now login.");
-
-            mailSender.send(message);
-        } catch(Exception e){
-            System.out.println("Mail sending failed: " + e.getMessage());
-        }
-
-        return ResponseEntity.ok("Registration successful. You can login now.");
+        return ResponseEntity.ok("Registration successful");
     }
 
     // ================= LOGIN =================
@@ -130,22 +111,7 @@ public class AuthController {
                     .body("User not found");
         }
 
-        User user = userOptional.get();
-
-        String resetLink = "https://your-frontend-url.vercel.app/reset-password/" + user.getId();
-
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
-            message.setSubject("Password Reset");
-            message.setText("Click the link below:\n\n" + resetLink);
-
-            mailSender.send(message);
-        } catch(Exception e){
-            System.out.println("Mail sending failed: " + e.getMessage());
-        }
-
-        return ResponseEntity.ok("Reset link sent to your email");
+        return ResponseEntity.ok("You can now reset your password");
     }
 
     // ================= RESET PASSWORD =================
